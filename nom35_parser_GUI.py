@@ -15,7 +15,6 @@ SCRIPT_VERSION_STR: str = f"{VERSION_MAIN}.{VERSION_MINOR}.{VERSION_PATCH}"
 EXT_CSV: str = ".csv"
 
 ### Global variables ###
-csv_file: str = ""
 csv_manager: CsvManager
 
 
@@ -24,20 +23,27 @@ csv_manager: CsvManager
 
 def generate_report():
     """Generate Report"""
-    app.info(f"{SCRIPT_NAME}", "Reporte listo")
-    print("Reporte listo!")
+    global csv_manager
+    if csv_manager.generate_report():
+        app.info(f"{SCRIPT_NAME}", "Reporte listo")
+    else:
+        app.error(f"{SCRIPT_NAME}", "Error al generar report")
 
 
 def pick_file():
     """Pick a csv file"""
-    csv_file = app.select_file(
+    global csv_manager
+    global generate_report_button
+    file_name: str = app.select_file(
         filetypes=[["Archivo CSV", f"*{EXT_CSV}"]]
     )
-    file_name_text.value = f"Archivo:\n{csv_file}"
-    csv_manager = CsvManager(csv_file)
+    file_name_text.value = f"Archivo:\n{file_name}"
+    csv_manager = CsvManager(file_name)
     if csv_manager.valid:
+        generate_report_button.enable()
         print(f"Archivo {csv_manager.get_file()} seleccionado")
     else:
+        generate_report_button.disable()
         print(f"Archivo erroneo")
 
 
@@ -62,7 +68,7 @@ pick_file_button: PushButton = PushButton(
 file_name_text: Text = Text(
     file_box,
     align="left",
-    text=f"Archivo: {csv_file}",
+    text=f"Archivo:\n",
 )
 
 generate_report_button: PushButton = PushButton(
@@ -71,6 +77,7 @@ generate_report_button: PushButton = PushButton(
     align="left",
     command=generate_report,
     text="Generar Reporte",
+    enabled=False,
 )
 
 

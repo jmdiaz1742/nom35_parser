@@ -3,6 +3,7 @@
 # Produce un reporte con resultados y graficas
 
 from guizero import App, Box, PushButton, Text, TextBox
+from csv_manager import CsvManager
 
 #### Constants ###
 SCRIPT_NAME: str = "Generador de reporte para NOM-35"
@@ -15,6 +16,7 @@ EXT_CSV: str = ".csv"
 
 ### Global variables ###
 csv_file: str = ""
+csv_manager: CsvManager
 
 
 ### Functions ###
@@ -22,6 +24,7 @@ csv_file: str = ""
 
 def generate_report():
     """Generate Report"""
+    app.info(f"{SCRIPT_NAME}", "Reporte listo")
     print("Reporte listo!")
 
 
@@ -31,7 +34,11 @@ def pick_file():
         filetypes=[["Archivo CSV", f"*{EXT_CSV}"]]
     )
     file_name_text.value = f"Archivo:\n{csv_file}"
-    print(f"Archivo {csv_file} seleccionado")
+    csv_manager = CsvManager(csv_file)
+    if csv_manager.valid:
+        print(f"Archivo {csv_manager.get_file()} seleccionado")
+    else:
+        print(f"Archivo erroneo")
 
 
 ### GUI Elements ###

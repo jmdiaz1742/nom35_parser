@@ -27,6 +27,9 @@ def generate_report():
     """Generate Report"""
     global csv_manager
     if csv_manager.generate_report():
+        report: str = csv_manager.get_report()
+        with open("report.txt", "w") as report_file:
+            report_file.write(report)
         app.info(f"{SCRIPT_NAME}", "Reporte listo")
     else:
         app.error(f"{SCRIPT_NAME}", "Error al generar report")

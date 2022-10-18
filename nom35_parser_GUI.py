@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # NOM-35 Parser
 # Consume un archivo .csv con respuestas del cuestionario
 # Produce un reporte con resultados y graficas

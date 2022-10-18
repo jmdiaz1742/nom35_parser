@@ -17,59 +17,26 @@ ANS_STR: str = [
 ANS_VAL_SIGN: bool = [
     True,
     False,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
     False,
     True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
     False,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
     False,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
     False,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
-    True,
     False,
-    True,
-    True,
-    True,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
     True,
     True,
     True,
@@ -87,6 +54,41 @@ ANS_VAL_SIGN: bool = [
     True,
     True,
     True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    True,
+    False,
+    True,
+    True,
+    True,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    True,
+    False,
+    False,
+    False,
+    False,
+    True,
+    False,
+    False,
+    False,
+    False,
 ]
 
 
@@ -96,6 +98,7 @@ class CsvManager:
     __questions_raw_data: list
     __answers_raw_data: list
     __answers_num_data: list = []
+    __answers_num_avg: list = []
 
     def __init__(self, file_name):
         self.__file_name = file_name
@@ -113,7 +116,9 @@ class CsvManager:
         """Generate the report"""
         if not (self.__extract_data()):
             return False
-        if not (self.__process_answers_nums()):
+        if not (self.process_answers_nums()):
+            return False
+        if not (self.process_average_nums()):
             return False
         return True
 
@@ -131,7 +136,7 @@ class CsvManager:
             return False
         return True
 
-    def __process_answers_nums(self) -> bool:
+    def process_answers_nums(self) -> bool:
         """Translate text answers to numerical answers"""
         for index, ans_str_list in enumerate(self.__answers_raw_data):
             ans_nums: list = []
@@ -147,10 +152,22 @@ class CsvManager:
         value: int = ANS_ERROR
 
         if (ans_str in ANS_STR):
-            if(ANS_VAL_SIGN[index]):
+            if (ANS_VAL_SIGN[index]):
                 value = ANS_STR.index(ans_str)
             else:
-                value = len(ANS_STR) - ANS_STR.index(ans_str)
+                value = len(ANS_STR) - ANS_STR.index(ans_str) - 1
         else:
             print(f"Answer {ans_str} not valid")
         return value
+
+    def process_average_nums(self) -> bool:
+        for ans_index in range(len(ANS_VAL_SIGN)):
+            total_val: int = 0
+            val_num: int = 0
+            for ans_val in self.__answers_num_data:
+                total_val += ans_val[ans_index]
+                val_num += 1
+            self.__answers_num_avg.insert(ans_index, total_val/val_num)
+            print(f"Ans {ans_index} total: {total_val}, avg: {self.__answers_num_avg[ans_index]}")
+
+        return True

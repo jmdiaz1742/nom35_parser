@@ -14,11 +14,11 @@ ANS_STR: str = [
     "Nunca",
 ]
 
-TITLE_REPORT: str = f"PREGUNTA\tPROMEDIO\tTOTAL\n\n"
-
 ANS_VAL_UP: int = 0
 ANS_VAL_DOWN: int = 1
 ANS_VAL_YESNO: int = 2
+
+ANS_VAL_NAN: int = -1
 
 # Indicates the numerical value of the string answers
 ANS_VAL_TYPE: int = [
@@ -109,11 +109,12 @@ class CsvManager:
     __answers_num_data: list = []
     __answers_num_avg: list = []
     __answers_num_total: list = []
+    __overall_avg: float = 0
+    __overall_total: int = 0
 
     def __init__(self, file_name):
         self.__file_name = file_name
         self.__is_valid = True
-        self.__report_txt = TITLE_REPORT
 
     def get_file(self) -> str:
         """Get the CSV file name"""
@@ -136,6 +137,8 @@ class CsvManager:
         if not (self.process_answers_nums()):
             return False
         if not (self.process_average_nums()):
+            return False
+        if not (self.process_total_nums()):
             return False
         if not (self.__populate_report()):
             return False
@@ -175,6 +178,7 @@ class CsvManager:
         return True
 
     def __get_answ_num(self, ans_str: str, index: int) -> int:
+        """Get the numerical value of a string answer"""
         value: int = ANS_ERROR
 
         if (ANS_VAL_YESNO == ANS_VAL_TYPE[index]) or (ans_str == ''):
@@ -191,37 +195,73 @@ class CsvManager:
             print(f"Answer {ans_str} not valid")
         return value
 
+    def __is_question_numerical(self, index: int) -> bool:
+        val_type: int = ANS_VAL_TYPE[index]
+        if (val_type == ANS_VAL_UP) or (val_type == ANS_VAL_DOWN):
+            return True
+        else:
+            return False
+
     def process_average_nums(self) -> bool:
+        """Get the average numbers"""
         for ans_index in range(len(ANS_VAL_TYPE)):
             val_total: int = 0
             val_avg: float = 0
             val_num: int = 0
-            for ans_val in self.__answers_num_data:
-                val_total += ans_val[ans_index]
-                val_num += 1
-            val_avg = val_total/val_num
+            if self.__is_question_numerical(ans_index):
+                for ans_val in self.__answers_num_data:
+                    val_total += ans_val[ans_index]
+                    val_num += 1
+                val_avg = val_total / val_num
             self.__answers_num_avg.insert(ans_index, val_avg)
             self.__answers_num_total.insert(ans_index, val_total)
-            # Add info to the text report
-            message: str = f"Question {ans_index} "
-            message += f"avg: {self.__answers_num_avg[ans_index]:.2},\t"
-            message += f"total: {self.__answers_num_total[ans_index]}"
-            print(message)
-            print(message)
 
+            # message: str = f"Question {ans_index} "
+            # message += f"avg: {self.__answers_num_avg[ans_index]:.2},\t"
+            # message += f"total: {self.__answers_num_total[ans_index]}"
+            # print(message)
+
+        return True
+
+    def process_total_nums(self) -> bool:
+        """Get the overall numbers"""
+        val_num: int = 0
+        self.__overall_total = 0
+        for index, value in enumerate(self.__answers_num_total):
+            if (self.__is_question_numerical(index)):
+                self.__overall_total += value
+                val_num += 1
+        self.__overall_avg = self.__overall_total / \
+            len(self.__answers_raw_data)
         return True
 
     def __populate_report(self) -> bool:
+        """Populate the text report"""
+        # Write title
+        line: str = self.__pad_text_1st_column("PREGUNTA,")
+        line += "PROM,\tTOTAL\n"
+        self.__add_to_report(line)
+
         for ans_index in range(len(ANS_VAL_TYPE)):
-            line: str = f"{self.__get_question_str(ans_index)}"
-            line += f"{self.__answers_num_avg[ans_index]:.2},\t"
-            line += f"{self.__answers_num_total[ans_index]}"
+            # Write all the questions lines
+            question_str: str = f"{self.__questions_raw_data[ans_index]},"
+            line = f"{self.__pad_text_1st_column(question_str)}"
+            if (self.__is_question_numerical(ans_index)):
+                line += f"{self.__answers_num_avg[ans_index]:.4f},\t"
+                line += f"{self.__answers_num_total[ans_index]}"
             self.__add_to_report(line)
+
+        # Write the TOTAL line
+        self.__add_to_report("")
+        line = self.__pad_text_1st_column("TOTAL,")
+        line += f"{self.__overall_avg:.4f},\t{self.__overall_total}"
+        self.__add_to_report(line)
+
         return True
 
-    def __get_question_str(self, question_index: int) -> str:
-        question_str: str = self.__questions_raw_data[question_index]
-        pad_len: int = self.__questions_max_length - len(question_str) + 1
+    def __pad_text_1st_column(self, text: str) -> str:
+        # Add 2 to account for the comma, and an extra space
+        pad_len: int = self.__questions_max_length - len(text) + 2
         for _ in range(pad_len):
-            question_str += " "
-        return question_str
+            text += " "
+        return text

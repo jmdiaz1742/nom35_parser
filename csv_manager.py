@@ -103,6 +103,7 @@ class CsvManager:
     __file_name: str = ""
     __report_txt: str = ""
     __is_valid: bool = False
+    __is_data_ready: bool = False
     __questions_raw_data: list
     __questions_max_length: int = 0
     __answers_raw_data: list
@@ -115,6 +116,7 @@ class CsvManager:
     def __init__(self, file_name):
         self.__file_name = file_name
         self.__is_valid = True
+        self.__is_data_ready = False
 
     def get_file(self) -> str:
         """Get the CSV file name"""
@@ -126,6 +128,9 @@ class CsvManager:
     def valid(self) -> bool:
         """True if the file is valid"""
         return self.__is_valid
+
+    def data_ready(self) -> bool:
+        return self.__is_data_ready
 
     def __add_to_report(self, line: str):
         self.__report_txt += f"{line}\n"
@@ -221,6 +226,8 @@ class CsvManager:
             # message += f"total: {self.__answers_num_total[ans_index]}"
             # print(message)
 
+        self.__is_data_ready = True
+
         return True
 
     def process_total_nums(self) -> bool:
@@ -265,3 +272,14 @@ class CsvManager:
         for _ in range(pad_len):
             text += pad_char
         return text
+
+    def get_answers_list(self, que_index: int) -> list:
+        ans_list: list = []
+
+        for ans_index in range(len(ANS_VAL_TYPE)):
+            ans_list.insert(
+                ans_index,
+                self.__answers_num_data[ans_index][que_index]
+            )
+
+        return ans_list

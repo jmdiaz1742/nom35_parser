@@ -6,6 +6,7 @@
 
 from guizero import App, Box, PushButton, Text, TextBox
 from csv_manager import CsvManager
+from graph_manager import *
 
 #### Constants ###
 SCRIPT_NAME: str = "Generador de reporte para NOM-35"
@@ -23,18 +24,6 @@ csv_manager: CsvManager
 ### Functions ###
 
 
-def generate_report():
-    """Generate Report"""
-    global csv_manager
-    if csv_manager.generate_report():
-        report: str = csv_manager.get_report()
-        with open("report.txt", "w") as report_file:
-            report_file.write(report)
-        app.info(f"{SCRIPT_NAME}", "Reporte listo")
-    else:
-        app.error(f"{SCRIPT_NAME}", "Error al generar report")
-
-
 def pick_file():
     """Pick a csv file"""
     global csv_manager
@@ -50,6 +39,31 @@ def pick_file():
     else:
         generate_report_button.disable()
         print(f"Archivo erroneo")
+
+
+def generate_report():
+    """Generate Report"""
+    global csv_manager
+    global generate_report_button
+    global generate_graphs_button
+    if csv_manager.generate_report():
+        report: str = csv_manager.get_report()
+        with open("report.txt", "w") as report_file:
+            report_file.write(report)
+        generate_graphs_button.enable()
+        app.info(f"{SCRIPT_NAME}", "Reporte listo")
+    else:
+        app.error(f"{SCRIPT_NAME}", "Error al generar report")
+
+
+def generate_graphs():
+    """Generate Graphs"""
+    global csv_manager
+    # if csv_manager.data_ready():
+    if create_histogram(csv_manager.get_answers_list(0)):
+        app.info(f"{SCRIPT_NAME}", "Gráficas creadas")
+    else:
+        app.error(f"{SCRIPT_NAME}", "Error al generar gráficas")
 
 
 ### GUI Elements ###
@@ -82,6 +96,15 @@ generate_report_button: PushButton = PushButton(
     align="left",
     command=generate_report,
     text="Generar Reporte",
+    enabled=False,
+)
+
+generate_graphs_button: PushButton = PushButton(
+    app,
+    grid=[0, 2],
+    align="left",
+    command=generate_graphs,
+    text="Generar Gráficas",
     enabled=False,
 )
 

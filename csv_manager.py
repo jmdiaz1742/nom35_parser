@@ -238,8 +238,8 @@ class CsvManager:
     def __populate_report(self) -> bool:
         """Populate the text report"""
         # Write title
-        line: str = self.__pad_text_1st_column("PREGUNTA,")
-        line += "PROM,\tTOTAL\n"
+        line: str = self.__pad_text_1st_column("PREGUNTA,", "-")
+        line += "PROM,---TOTAL\n"
         self.__add_to_report(line)
 
         for ans_index in range(len(ANS_VAL_TYPE)):
@@ -247,21 +247,21 @@ class CsvManager:
             question_str: str = f"{self.__questions_raw_data[ans_index]},"
             line = f"{self.__pad_text_1st_column(question_str)}"
             if (self.__is_question_numerical(ans_index)):
-                line += f"{self.__answers_num_avg[ans_index]:.4f},\t"
+                line += f"{self.__answers_num_avg[ans_index]:.4f}, "
                 line += f"{self.__answers_num_total[ans_index]}"
             self.__add_to_report(line)
 
         # Write the TOTAL line
         self.__add_to_report("")
         line = self.__pad_text_1st_column("TOTAL,")
-        line += f"{self.__overall_avg:.4f},\t{self.__overall_total}"
+        line += f"{self.__overall_avg:.4f}, {self.__overall_total}"
         self.__add_to_report(line)
 
         return True
 
-    def __pad_text_1st_column(self, text: str) -> str:
+    def __pad_text_1st_column(self, text: str, pad_char: str = " ") -> str:
         # Add 2 to account for the comma, and an extra space
         pad_len: int = self.__questions_max_length - len(text) + 2
         for _ in range(pad_len):
-            text += " "
+            text += pad_char
         return text

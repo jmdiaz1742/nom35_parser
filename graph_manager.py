@@ -6,11 +6,17 @@ import os
 MAX_TITLE_LEN: int = 60
 
 
-def create_histogram(ans_list: list, title: str, index: int) -> bool:
+def create_histogram(ans_list: list, title: str, index: int, is_numerical: bool) -> bool:
     values: list = []
-    for ans_index, ans in enumerate(ANS_STR):
+    keys: list
+    if is_numerical:
+        keys = ANS_NUM_STR
+    else:
+        keys = ANS_YESNO_STR
+    for ans_index, ans in enumerate(keys):
         values.insert(ans_index, ans_list.count(ans))
-    plt.bar(ANS_STR, values)
+
+    plt.bar(keys, values)
     plt.title(multi_line_title(title))
     plt.savefig(f"graficas/pregunta_{index:02}.png")
     # plt.show()
@@ -26,7 +32,8 @@ def create_all_histograms(csv_man: CsvManager) -> bool:
             create_histogram(
                 csv_man.get_answers_list(index),
                 csv_man.get_question_str(index),
-                index
+                index,
+                csv_man.is_question_numerical(index)
             )
     except:
         return False
@@ -40,8 +47,8 @@ def multi_line_title(title: str) -> str:
         multi_line_title: str
         # Find the last space before the one line limit
         nl_pos: int = title[0:MAX_TITLE_LEN].rfind(" ")
-        # Insert a new line in that space
         multi_line_title = title[0:nl_pos]
+        # Insert a new line in that space
         multi_line_title += os.linesep
         multi_line_title += title[nl_pos+1:len(title)]
         return multi_line_title

@@ -6,12 +6,16 @@ ANSWERS_OFFSET: int = 3
 QUESTIONS_OFFSET: int = 3
 ANS_ERROR: int = -1
 
-ANS_STR: str = [
+ANS_NUM_STR: str = [
     "Siempre",
     "Casi siempre",
     "Algunas veces",
     "Casi nunca",
     "Nunca",
+]
+ANS_YESNO_STR: str = [
+    "Si",
+    "No",
 ]
 
 ANS_VAL_UP: int = 0
@@ -193,16 +197,16 @@ class CsvManager:
         else:
             try:
                 if (ANS_VAL_UP == ANS_VAL_TYPE[index]):
-                    value = ANS_STR.index(ans_str)
+                    value = ANS_NUM_STR.index(ans_str)
                 elif (ANS_VAL_DOWN == ANS_VAL_TYPE[index]):
-                    value = len(ANS_STR) - ANS_STR.index(ans_str) - 1
+                    value = len(ANS_NUM_STR) - ANS_NUM_STR.index(ans_str) - 1
             except:
                 pass
         if (ANS_ERROR == value):
             print(f"Answer {ans_str} not valid")
         return value
 
-    def __is_question_numerical(self, index: int) -> bool:
+    def is_question_numerical(self, index: int) -> bool:
         val_type: int = ANS_VAL_TYPE[index]
         if (val_type == ANS_VAL_UP) or (val_type == ANS_VAL_DOWN):
             return True
@@ -215,7 +219,7 @@ class CsvManager:
             val_total: int = 0
             val_avg: float = 0
             val_num: int = 0
-            if self.__is_question_numerical(ans_index):
+            if self.is_question_numerical(ans_index):
                 for ans_val in self.__answers_num_data:
                     val_total += ans_val[ans_index]
                     val_num += 1
@@ -237,7 +241,7 @@ class CsvManager:
         val_num: int = 0
         self.__overall_total = 0
         for index, value in enumerate(self.__answers_num_total):
-            if (self.__is_question_numerical(index)):
+            if (self.is_question_numerical(index)):
                 self.__overall_total += value
                 val_num += 1
         self.__overall_avg = self.__overall_total / \
@@ -255,7 +259,7 @@ class CsvManager:
             # Write all the questions lines
             question_str: str = f"{self.__questions_raw_data[ans_index]},"
             line = f"{self.__pad_text_1st_column(question_str)}"
-            if (self.__is_question_numerical(ans_index)):
+            if (self.is_question_numerical(ans_index)):
                 line += f"{self.__answers_num_avg[ans_index]:.4f}, "
                 line += f"{self.__answers_num_total[ans_index]}"
             self.__add_to_report(line)

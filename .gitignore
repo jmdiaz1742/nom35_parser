@@ -131,3 +131,4 @@ dmypy.json
 # Test files
 test_files/
 report.txt
+graficas/

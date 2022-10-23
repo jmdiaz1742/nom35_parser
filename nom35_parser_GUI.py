@@ -35,6 +35,7 @@ def pick_file():
     csv_manager = CsvManager(file_name)
     if csv_manager.valid:
         generate_report_button.enable()
+        generate_all_button.enable()
         print(f"Archivo {csv_manager.get_file()} seleccionado")
     else:
         generate_report_button.disable()
@@ -46,12 +47,15 @@ def generate_report():
     global csv_manager
     global generate_report_button
     global generate_graphs_button
+    global progress_text
+
     if csv_manager.generate_report():
+        progress_text.value = "Generando Reporte..."
         report: str = csv_manager.get_report()
         with open("report.txt", "w") as report_file:
             report_file.write(report)
         generate_graphs_button.enable()
-        app.info(f"{SCRIPT_NAME}", "Reporte listo")
+        progress_text.value = "Reporte generado..."
     else:
         app.error(f"{SCRIPT_NAME}", "Error al generar report")
 
@@ -59,11 +63,19 @@ def generate_report():
 def generate_graphs():
     """Generate Graphs"""
     global csv_manager
-    # if csv_manager.data_ready():
-    if create_histogram(csv_manager.get_answers_list(0)):
-        app.info(f"{SCRIPT_NAME}", "Gráficas creadas")
+    global progress_text
+
+    progress_text.value = "Generando Gráficas..."
+    if create_all_histograms(csv_manager):
+        progress_text.value = "Gráficas generadas"
     else:
         app.error(f"{SCRIPT_NAME}", "Error al generar gráficas")
+
+
+def generate_all():
+    generate_report()
+    generate_graphs()
+    progress_text.value = "Todo generado!"
 
 
 ### GUI Elements ###
@@ -101,11 +113,27 @@ generate_report_button: PushButton = PushButton(
 
 generate_graphs_button: PushButton = PushButton(
     app,
-    grid=[0, 2],
+    grid=[1, 1],
     align="left",
     command=generate_graphs,
     text="Generar Gráficas",
     enabled=False,
+)
+
+generate_all_button: PushButton = PushButton(
+    app,
+    grid=[0, 2],
+    align="left",
+    command=generate_all,
+    text="Generar Todo",
+    enabled=False,
+)
+
+progress_text: Text = Text(
+    app,
+    grid=[0, 3],
+    align="left",
+    text="",
 )
 
 

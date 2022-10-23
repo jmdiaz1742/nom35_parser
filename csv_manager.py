@@ -100,6 +100,7 @@ ANS_VAL_TYPE: int = [
 
 
 class CsvManager:
+    ANS_NUM: int = len(ANS_VAL_TYPE)
     __file_name: str = ""
     __report_txt: str = ""
     __is_valid: bool = False
@@ -174,7 +175,7 @@ class CsvManager:
         """Translate text answers to numerical answers"""
         for index, ans_str_list in enumerate(self.__answers_raw_data):
             ans_nums: list = []
-            for ans_index in range(len(ANS_VAL_TYPE)):
+            for ans_index in range(self.ANS_NUM):
                 ans_str: str = ans_str_list[ans_index + ANSWERS_OFFSET]
                 value: int = self.__get_answ_num(ans_str, ans_index)
                 # print(f"Ans {ans_str} in index {index} has value of {value}")
@@ -209,7 +210,7 @@ class CsvManager:
 
     def process_average_nums(self) -> bool:
         """Get the average numbers"""
-        for ans_index in range(len(ANS_VAL_TYPE)):
+        for ans_index in range(self.ANS_NUM):
             val_total: int = 0
             val_avg: float = 0
             val_num: int = 0
@@ -249,7 +250,7 @@ class CsvManager:
         line += "PROM,---TOTAL\n"
         self.__add_to_report(line)
 
-        for ans_index in range(len(ANS_VAL_TYPE)):
+        for ans_index in range(self.ANS_NUM):
             # Write all the questions lines
             question_str: str = f"{self.__questions_raw_data[ans_index]},"
             line = f"{self.__pad_text_1st_column(question_str)}"
@@ -276,10 +277,13 @@ class CsvManager:
     def get_answers_list(self, que_index: int) -> list:
         ans_list: list = []
 
-        for ans_index in range(len(ANS_VAL_TYPE)):
+        for ans_index in range(self.ANS_NUM):
             ans_list.insert(
                 ans_index,
-                self.__answers_num_data[ans_index][que_index]
+                self.__answers_raw_data[ans_index][que_index + ANSWERS_OFFSET]
             )
 
         return ans_list
+
+    def get_question_str(self, que_index: int) -> str:
+        return self.__questions_raw_data[que_index]
